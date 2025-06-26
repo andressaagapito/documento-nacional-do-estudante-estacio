@@ -1,0 +1,415 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Carteirinha Estudantil</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
+    body { background-color: #f8f8f8; }
+    .screen { display: none; }
+    .active { display: block; }
+    .header { background-color: #014bcc; color: white; padding: 1rem; text-align: center; font-size: 1.5rem; position: relative; margin-bottom: 20px;}
+    .acessar-carteirinha { text-align: center; font-size: 0.9rem; color: #666; padding: 1rem; cursor: pointer; }
+    .menu-perfil { padding: 0 1rem; }
+    .menu-title { font-weight: bold; margin-bottom: 1rem; }
+    .grid-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .card { background-color: white; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05); display: flex; flex-direction: column; align-items: flex-start; justify-content: center; min-height: 100px; }
+    .card-icon { margin-bottom: 1rem; font-size: 1.5rem; }
+    .card-title { font-size: 1rem; }
+    .highlight-card { background-color: #014bcc; color: white; position: relative; }
+    .highlight-card .badge { position: absolute; top: 0.5rem; right: 0.5rem; background-color: white; color: black; padding: 0.2rem 0.5rem; border-radius: 9999px; font-size: 0.7rem; font-weight: bold; }
+    .footer-text { text-align: center; color: #999; margin-top: 2rem; font-size: 0.8rem; }
+    .logout { text-align: center; margin-top: 1rem; font-weight: bold; color: #014bcc; cursor: pointer; }
+    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background-color: white; display: flex; justify-content: space-around; padding: 0.5rem 0; box-shadow: 0 -1px 5px rgba(0,0,0,0.1); }
+    .bottom-nav div { display: flex; flex-direction: column; align-items: center; font-size: 0.75rem; color: #999; cursor: pointer; }
+    .bottom-nav .active { color: #014bcc; }
+    .perfil-header { background-color: #014bcc; color: white; padding: 7.5rem; text-align: center; }
+    .perfil-header img { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; }
+    .perfil-info { margin-top: 2rem; }
+    .perfil-info strong { display: block; font-size: 1.2rem; margin-bottom: 2rem; }
+    .perfil-info span { display: block; margin: 0.2rem 0; margin-bottom: 1rem; }
+    .perfil-card { background-color: rgba(164, 214, 255, 0.582); border-radius: 1rem; margin: 1rem; padding: 1.5rem; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .perfil-card img { height: 32px; margin-bottom: 0.5rem; }
+    .perfil-card p { display: flex; justify-content: center;  margin: auto; }
+    .form-carreiras { padding: 1rem; }
+    .form-carreiras label { display: block; margin: 1rem 0 0.5rem; font-weight: bold; }
+    .form-carreiras input, .form-carreiras textarea {
+      width: 100%; padding: 0.5rem; border-radius: 4px; border: 1px solid #ccc;
+    }
+    .form-carreiras button {
+      margin-top: 1rem; padding: 0.6rem 1.2rem; background: #014bcc;
+      color: white; border: none; border-radius: 4px; cursor: pointer;
+    }
+
+    /* Estilos específicos da Carteirinha */
+    #tela-carteirinha {
+			background-color: #f6f6f6;
+        padding: 50px;
+    }
+
+    #tela-carteirinha .carteirinha-header .arrow-back {
+        font-size: 2rem;
+        margin-right: 1rem;
+        cursor: pointer;
+    }
+
+    #tela-carteirinha .carteirinha-content {
+			background-color: #f6f6f6;
+        margin-top: 90px;
+        padding: 1rem;
+        border-radius: 1rem;
+        text-align: center;
+				gap: 50px;
+    }
+
+    #tela-carteirinha .carteirinha-content .profile-pic-container {
+        position: relative;
+        width: 120px; /* Ajuste o tamanho conforme a imagem */
+        height: 120px; /* Ajuste o tamanho conforme a imagem */
+        border-radius: 50%;
+        overflow: hidden;
+        margin: -70px auto 1rem; /* Ajusta a posição para sobrepor o header */
+    }
+
+    #tela-carteirinha .carteirinha-content .profile-pic {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    #tela-carteirinha .carteirinha-content .add-icon {
+        position: absolute;
+        bottom: 5px;
+        right: 5px;
+        background-color: #0ec5c5; /* Cor do ícone de adicionar */
+        color: white;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        display: flex;
+				overflow: visible;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+
+    #tela-carteirinha .carteirinha-content .student-name {
+        font-size: 1.4rem;
+        font-weight: bold;
+        margin-bottom: 1.5rem;
+        color: #333;
+    }
+
+    #tela-carteirinha .carteirinha-details {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem 1rem; /* Espaçamento entre linhas e colunas */
+        text-align: left;
+        margin-bottom: 1rem;
+    }
+
+    #tela-carteirinha .carteirinha-details div {
+        margin-bottom: 1rem;
+
+    }
+
+    #tela-carteirinha .carteirinha-details strong {
+        display: block;
+        font-size: 0.85rem;
+        color: #888;
+				padding-bottom: 10px;
+    }
+
+    #tela-carteirinha .carteirinha-details span {
+        display: block;
+        font-size: 1rem;
+        color: #333;
+        font-weight: bold;
+    }
+    
+    #tela-carteirinha .carteirinha-details .full-width {
+        grid-column: span 2;
+    }
+
+    #tela-carteirinha .logo-estacio {
+        height: 50px; /* Ajuste conforme a imagem */
+        margin-top: 1.5rem;
+    }
+
+    #tela-carteirinha .validation-text {
+        font-size: 0.8rem;
+        color: #999;
+        margin-top: 1rem;
+    }
+
+    /* Estilos para a tela Perfil para a foto e ícone de câmera */
+    .foto-wrapper {
+        position: relative;
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        margin: 0 auto;
+        overflow: hidden;
+        border: 2px solid white;
+    }
+
+    .foto-wrapper #fotoPerfil {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .camera-icon {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        background-color: #014bcc;
+        color: white;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        cursor: pointer;
+    }
+
+  </style>
+</head>
+<body>
+  <div id="tela-inicial" class="screen active">
+    <div class="header"></div>
+    <div class="acessar-carteirinha" onclick="showScreen('tela-carteirinha')"><img src="./assets/icons/duplaseta.svg" style="width: 15px; margin-right: 8px; margin-top: 2px;">Acessar carteirinha</div>
+    <div class="menu-perfil">
+      <div class="menu-title">Menu perfil</div>
+      <div class="grid-cards">
+<div class="card"><div class="card-icon"><img src="./assets/icons/meusdados.svg" height="25px"></div><div class="card-title">Meus dados</div></div>
+        <div class="card"><div class="card-icon"><img src="./assets/icons/f7--menu.svg" height="25px"></div><div class="card-title">Política de Privacidade</div></div>
+        <div class="card"><div class="card-icon"><img src="./assets/icons/label.svg" height="20px"></div><div class="card-title">Envio de documentação</div></div>
+        <div class="card highlight-card">
+          <div class="badge">Novo!</div>
+          <img src="./assets/icons//star.svg" height="30px">
+          <div class="card-title" style="margin-top: 12px;">Conquistas e recompensas</div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-text">Versão do Aplicativo 5.35.1.</div>
+    <div class="logout">Sair do APP</div>
+    <div class="bottom-nav">
+    <div onclick="showScreen('tela-inicial')"><img src="./assets/icons/house.png"><div>Início</div></div>
+    <div class="active" onclick="showScreen('tela-carreiras')"><img src="./assets/icons/rocket.png"><div>Carreiras</div></div>
+      <div><img src="./assets/icons/financeiro.svg" height="24px"><div>Financeiro</div></div>
+    <div><img src="./assets/icons/qlementine-icons--question-24.svg"><div>Suporte</div></div>
+      <div class="active" onclick="showScreen('tela-perfil')"><img src="./assets/icons/perfil.svg" height="28px"><div>Perfil</div></div>
+    </div>
+  </div>
+
+  <div id="tela-perfil" class="screen">
+    <div class="perfil-header">
+      <div class="foto-wrapper">
+        <img src="https://via.placeholder.com/100" alt="Foto de perfil" id="fotoPerfil" />
+      </div>
+      <div class="perfil-info">
+        <strong id="nomePerfil">Andressa Silva</strong>
+        <span id="emailPerfil">andressaagapito@live.com</span>
+        <span id="telefonePerfil">(21) 96511-4212</span>
+        <span class="curso" id="cursoPerfil">Análise e desenvolvimento de sistemas</span>
+      </div>
+    </div>
+    
+<div class="perfil-card" style="position: absolute; top: 420px; width: 460px; border-radius: 1rem; padding: 1.5rem; display: flex; flex-direction: column; align-items: flex-start; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); font-family: sans-serif;">
+  <div>
+    <img src="./assets/logo/estacio.svg" alt="Estácio" style="display: block; width: 120px; margin-bottom: 2rem;" />
+  </div>
+
+  <div style=" margin-top: 20px; color: rgb(53, 53, 53); width: 100%; display: flex; justify-content: space-between; padding: 1rem; border-radius: 0 0 1rem 1rem; font-size: 0.9rem;">
+    <div style="display: flex; flex-direction: column; text-align: left;">
+      <strong style="margin-bottom: 4px;">Matrícula</strong>
+      <span id="matriculaPerfil" style="font-weight: bold;">2021 1105 5211</span>
+    </div>
+    <div style="display: flex; flex-direction: column; text-align: left;">
+      <strong style="margin-bottom: 4px;">Validade</strong>
+      <span id="validadePerfil" style="font-weight: bold;">Jul 2025</span>
+    </div>
+  </div>
+</div>
+
+    
+<div class="acessar-carteirinha" onclick="showScreen('tela-carteirinha')"><img src="./assets/icons/duplaseta.svg" style="width: 15px; margin-right: 8px; margin-top: 100px;">Acessar carteirinha</div>
+    <div class="bottom-nav">
+    <div onclick="showScreen('tela-inicial')"><img src="./assets/icons/house.png"><div>Início</div></div>
+    <div class="active" onclick="showScreen('tela-carreiras')"><img src="./assets/icons/rocket.png"><div>Carreiras</div></div>
+      <div><img src="./assets/icons/financeiro.svg" height="24px"><div>Financeiro</div></div>
+    <div><img src="./assets/icons/qlementine-icons--question-24.svg"><div>Suporte</div></div>
+      <div class="active" onclick="showScreen('tela-perfil')"><img src="./assets/icons/perfil.svg" height="28px"><div>Perfil</div></div>
+    </div>
+  </div>
+
+  <div id="tela-carteirinha" class="screen">
+  <div class="carteirinha-header">
+    <div class="arrow-back" onclick="showScreen('tela-perfil')"><img src="./assets/icons/setaazul.svg"></div>
+  </div>
+  <div class="carteirinha-content">
+    <div class="profile-pic-container">
+      <img src="https://via.placeholder.com/120" id="fotoCarteirinha" class="profile-pic" alt="Foto" />
+    </div>
+    <div class="student-name" id="nomeCarteirinha">Andressa Conceição Da Silva</div>
+    <div class="carteirinha-details">
+      <div>
+        <strong>CPF</strong>
+        <span id="cpfCarteirinha">129.018.197-70</span>
+      </div>
+      <div>
+        <strong>Nascimento</strong>
+        <span id="nascimentoCarteirinha">29 Nov 1994</span>
+      </div>
+      <div>
+        <strong>Matrícula</strong>
+        <span id="matriculaCarteirinha">2021 1105 5211</span>
+      </div>
+      <div>
+        <strong>Validade</strong>
+        <span id="validadeCarteirinha">Jul 2025</span>
+      </div>
+      <div class="full-width">
+        <strong>Curso (Ativo)</strong>
+        <span id="cursoCarteirinha">Análise e desenvolvimento de sistemas</span>
+      </div>
+      <div class="full-width">
+        <strong>Campus</strong>
+        <span id="campusCarteirinha">POLO CENTRO - BELFORD ROXO - RJ</span>
+      </div>
+    </div>
+    <img class="logo-estacio" src="./assets/logo/estacio.svg" alt="Estácio" />
+    <p class="validation-text">Válida mediante apresentação de documento com foto</p>
+  </div>
+</div>
+
+
+  
+<div id="tela-carreiras" class="screen">
+  <div class="form-carreiras">
+    <label for="nome">Nome</label>
+    <input type="text" id="nome" />
+
+    <label for="cpf">CPF</label>
+    <input type="text" id="cpf" />
+
+    <label for="nascimento">Nascimento</label>
+    <input type="text" id="nascimento" />
+
+    <label for="matricula">Matrícula</label>
+    <input type="text" id="matricula" />
+
+    <label for="validade">Validade</label>
+    <input type="text" id="validade" />
+
+    <label for="curso">Curso</label>
+    <input type="text" id="curso" />
+
+    <label for="campus">Campus</label>
+    <textarea id="campus"></textarea>
+
+    <label for="foto">Foto</label>
+    <input type="file" id="foto" accept="image/*" />
+
+    <button onclick="salvarDados()">Salvar</button>
+  </div>
+
+  <div class="bottom-nav">
+    <div onclick="showScreen('tela-inicial')"><img src="./assets/icons/house.png"><div>Início</div></div>
+    <div class="active" onclick="showScreen('tela-carreiras')"><img src="./assets/icons/rocket.png"><div>Carreiras</div></div>
+    <div><img src="./assets/icons/financeiro.svg"><div>Financeiro</div></div>
+    <div><img src="./assets/icons/qlementine-icons--question-24.svg"><div>Suporte</div></div>
+      <div class="active" onclick="showScreen('tela-perfil')"><img src="./assets/icons/perfil.svg" height="28px"><div>Perfil</div></div>
+  </div>
+</div>
+
+  <script>
+    function showScreen(id) {
+      document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+      const target = document.getElementById(id);
+      if (target) {
+        target.classList.add('active');
+      } else {
+        alert('Tela "' + id + '" não encontrada.');
+      }
+    }
+    
+    function salvarDados() {
+      const nome = document.getElementById('nome').value;
+      const cpf = document.getElementById('cpf').value;
+      const nascimento = document.getElementById('nascimento').value;
+      const matricula = document.getElementById('matricula').value;
+      const validade = document.getElementById('validade').value;
+      const curso = document.getElementById('curso').value;
+      const campus = document.getElementById('campus').value;
+      const fotoInput = document.getElementById('foto');
+
+      // Atualiza os dados na tela da Carteirinha
+      document.getElementById('nomeCarteirinha').textContent = nome;
+      document.getElementById('cpfCarteirinha').textContent = cpf;
+      document.getElementById('nascimentoCarteirinha').textContent = nascimento;
+      document.getElementById('matriculaCarteirinha').textContent = matricula;
+      document.getElementById('validadeCarteirinha').textContent = validade;
+      document.getElementById('cursoCarteirinha').textContent = curso;
+      document.getElementById('campusCarteirinha').textContent = campus;
+
+      // Atualiza os dados na tela Perfil
+      document.getElementById('nomePerfil').textContent = nome.split(' ')[0] + ' ' + nome.split(' ').pop(); // Pega primeiro e último nome
+      document.getElementById('matriculaPerfil').textContent = matricula;
+      document.getElementById('validadePerfil').textContent = validade;
+      document.getElementById('cursoPerfil').textContent = curso;
+
+
+      if (fotoInput.files && fotoInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          document.getElementById('fotoCarteirinha').src = e.target.result;
+          document.getElementById('fotoPerfil').src = e.target.result;
+        };
+        reader.readAsDataURL(fotoInput.files[0]);
+      }
+
+      showScreen('tela-carteirinha');
+    }
+
+    // Função para pré-carregar dados iniciais (opcional, para testar)
+    window.onload = function() {
+        // Dados de exemplo para a carteirinha
+        document.getElementById('nomeCarteirinha').textContent = "Andressa Conceição Da Silva";
+        document.getElementById('cpfCarteirinha').textContent = "129.018.197-70";
+        document.getElementById('nascimentoCarteirinha').textContent = "29 Nov 1994";
+        document.getElementById('matriculaCarteirinha').textContent = "2021 1105 5211";
+        document.getElementById('validadeCarteirinha').textContent = "Jul 2025";
+        document.getElementById('cursoCarteirinha').textContent = "Análise e desenvolvimento de sistemas";
+        document.getElementById('campusCarteirinha').textContent = "POLO CENTRO - BELFORD ROXO - RJ";
+        
+        // Dados de exemplo para a tela de Perfil
+        document.getElementById('nomePerfil').textContent = "Andressa Silva";
+        document.getElementById('emailPerfil').textContent = "andressaagapito@live.com";
+        document.getElementById('telefonePerfil').textContent = "(21) 96511-4212";
+        document.getElementById('matriculaPerfil').textContent = "2021 1105 5211";
+        document.getElementById('validadePerfil').textContent = "Jul 2025";
+        document.getElementById('cursoPerfil').textContent = "Análise e desenvolvimento de sistemas";
+
+        // Placeholder para a foto de perfil e carteirinha
+        document.getElementById('fotoCarteirinha').src = "./assets/foto.jpg"; // Substitua pelo caminho da sua imagem real
+        document.getElementById('fotoPerfil').src = "./assets/foto.jpg"; // Substitua pelo caminho da sua imagem real
+
+        // Preenche os campos do formulário "Editar Dados" com os valores atuais
+        document.getElementById('nome').value = document.getElementById('nomeCarteirinha').textContent;
+        document.getElementById('cpf').value = document.getElementById('cpfCarteirinha').textContent;
+        document.getElementById('nascimento').value = document.getElementById('nascimentoCarteirinha').textContent;
+        document.getElementById('matricula').value = document.getElementById('matriculaCarteirinha').textContent;
+        document.getElementById('validade').value = document.getElementById('validadeCarteirinha').textContent;
+        document.getElementById('curso').value = document.getElementById('cursoCarteirinha').textContent;
+        document.getElementById('campus').value = document.getElementById('campusCarteirinha').textContent;
+    };
+  </script>
+</body>
+</html>
